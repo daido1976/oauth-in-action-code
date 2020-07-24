@@ -1,21 +1,21 @@
-var express = require("express");
-var request = require("sync-request");
-var url = require("url");
-var qs = require("qs");
-var querystring = require("querystring");
-var cons = require("consolidate");
-var randomstring = require("randomstring");
-var __ = require("underscore");
+let express = require("express");
+let request = require("sync-request");
+let url = require("url");
+let qs = require("qs");
+let querystring = require("querystring");
+let cons = require("consolidate");
+let randomstring = require("randomstring");
+let __ = require("underscore");
 __.string = require("underscore.string");
 
-var app = express();
+let app = express();
 
 app.engine("html", cons.underscore);
 app.set("view engine", "html");
 app.set("views", "files/client");
 
 // authorization server information
-var authServer = {
+let authServer = {
   authorizationEndpoint: "http://localhost:9001/authorize",
   tokenEndpoint: "http://localhost:9001/token",
 };
@@ -25,18 +25,18 @@ var authServer = {
 /*
  * Add the client information in here
  */
-var client = {
+let client = {
   client_id: "",
   client_secret: "",
   redirect_uris: ["http://localhost:9000/callback"],
 };
 
-var protectedResource = "http://localhost:9002/resource";
+let protectedResource = "http://localhost:9002/resource";
 
-var state = null;
+let state = null;
 
-var access_token = null;
-var scope = null;
+let access_token = null;
+let scope = null;
 
 app.get("/", function (req, res) {
   res.render("index", { access_token: access_token, scope: scope });
@@ -60,8 +60,8 @@ app.get("/fetch_resource", function (req, res) {
    */
 });
 
-var buildUrl = function (base, options, hash) {
-  var newUrl = url.parse(base, true);
+let buildUrl = function (base, options, hash) {
+  let newUrl = url.parse(base, true);
   delete newUrl.search;
   if (!newUrl.query) {
     newUrl.query = {};
@@ -76,7 +76,7 @@ var buildUrl = function (base, options, hash) {
   return url.format(newUrl);
 };
 
-var encodeClientCredentials = function (clientId, clientSecret) {
+let encodeClientCredentials = function (clientId, clientSecret) {
   return new Buffer(
     querystring.escape(clientId) + ":" + querystring.escape(clientSecret)
   ).toString("base64");
@@ -84,8 +84,8 @@ var encodeClientCredentials = function (clientId, clientSecret) {
 
 app.use("/", express.static("files/client"));
 
-var server = app.listen(9000, "localhost", function () {
-  var host = server.address().address;
-  var port = server.address().port;
+let server = app.listen(9000, "localhost", function () {
+  let host = server.address().address;
+  let port = server.address().port;
   console.log("OAuth Client is listening at http://%s:%s", host, port);
 });
