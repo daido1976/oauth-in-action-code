@@ -1,10 +1,10 @@
-var express = require("express");
-var bodyParser = require("body-parser");
-var cons = require("consolidate");
-var nosql = require("nosql").load("database.nosql");
-var cors = require("cors");
+let express = require("express");
+let bodyParser = require("body-parser");
+let cons = require("consolidate");
+let nosql = require("nosql").load("database.nosql");
+let cors = require("cors");
 
-var app = express();
+let app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // support form-encoded bodies (for bearer tokens)
 
@@ -16,15 +16,15 @@ app.set("json spaces", 4);
 app.use("/", express.static("files/protectedResource"));
 app.use(cors());
 
-var resource = {
+let resource = {
   name: "Protected Resource",
   description: "This data has been protected by OAuth 2.0",
 };
 
-var getAccessToken = function (req, res, next) {
+let getAccessToken = function (req, res, next) {
   // check the auth header first
-  var auth = req.headers["authorization"];
-  var inToken = null;
+  let auth = req.headers["authorization"];
+  let inToken = null;
   if (auth && auth.toLowerCase().indexOf("bearer") == 0) {
     inToken = auth.slice("bearer ".length);
   } else if (req.body && req.body.access_token) {
@@ -63,9 +63,9 @@ app.post("/resource", cors(), getAccessToken, function (req, res) {
   }
 });
 
-var server = app.listen(9002, "localhost", function () {
-  var host = server.address().address;
-  var port = server.address().port;
+let server = app.listen(9002, "localhost", function () {
+  let host = server.address().address;
+  let port = server.address().port;
 
   console.log("OAuth Resource Server is listening at http://%s:%s", host, port);
 });

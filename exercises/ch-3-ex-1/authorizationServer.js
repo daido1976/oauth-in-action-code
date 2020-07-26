@@ -1,14 +1,14 @@
-var express = require("express");
-var url = require("url");
-var bodyParser = require("body-parser");
-var randomstring = require("randomstring");
-var cons = require("consolidate");
-var nosql = require("nosql").load("database.nosql");
-var querystring = require("querystring");
-var __ = require("underscore");
+let express = require("express");
+let url = require("url");
+let bodyParser = require("body-parser");
+let randomstring = require("randomstring");
+let cons = require("consolidate");
+let nosql = require("nosql").load("database.nosql");
+let querystring = require("querystring");
+let __ = require("underscore");
 __.string = require("underscore.string");
 
-var app = express();
+let app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // support form-encoded bodies (for the token endpoint)
@@ -19,13 +19,13 @@ app.set("views", "files/authorizationServer");
 app.set("json spaces", 4);
 
 // authorization server information
-var authServer = {
+let authServer = {
   authorizationEndpoint: "http://localhost:9001/authorize",
   tokenEndpoint: "http://localhost:9001/token",
 };
 
 // client information
-var clients = [
+let clients = [
   {
     client_id: "oauth-client-1",
     client_secret: "oauth-client-secret-1",
@@ -34,11 +34,11 @@ var clients = [
   },
 ];
 
-var codes = {};
+let codes = {};
 
-var requests = {};
+let requests = {};
 
-var getClient = function (clientId) {
+let getClient = function (clientId) {
   return __.find(clients, function (client) {
     return client.client_id == clientId;
   });
@@ -49,7 +49,7 @@ app.get("/", function (req, res) {
 });
 
 app.get("/authorize", function (req, res) {
-  var client = getClient(req.query.client_id);
+  let client = getClient(req.query.client_id);
 
   if (!client) {
     console.log("Unknown client %s", req.query.client_id);
@@ -64,11 +64,11 @@ app.get("/authorize", function (req, res) {
     res.render("error", { error: "Invalid redirect URI" });
     return;
   } else {
-    var rscope = req.query.scope ? req.query.scope.split(" ") : undefined;
-    var cscope = client.scope ? client.scope.split(" ") : undefined;
+    let rscope = req.query.scope ? req.query.scope.split(" ") : undefined;
+    let cscope = client.scope ? client.scope.split(" ") : undefined;
     if (__.difference(rscope, cscope).length > 0) {
       // client asked for a scope it couldn't have
-      var urlParsed = url.parse(req.query.redirect_uri);
+      let urlParsed = url.parse(req.query.redirect_uri);
       delete urlParsed.search; // this is a weird behavior of the URL library
       urlParsed.query = urlParsed.query || {};
       urlParsed.query.error = "invalid_scope";
@@ -76,7 +76,7 @@ app.get("/authorize", function (req, res) {
       return;
     }
 
-    var reqid = randomstring.generate(8);
+    let reqid = randomstring.generate(8);
 
     requests[reqid] = req.query;
 
@@ -86,8 +86,8 @@ app.get("/authorize", function (req, res) {
 });
 
 app.post("/approve", function (req, res) {
-  var reqid = req.body.reqid;
-  var query = requests[reqid];
+  let reqid = req.body.reqid;
+  let query = requests[reqid];
   delete requests[reqid];
 
   if (!query) {
@@ -99,20 +99,20 @@ app.post("/approve", function (req, res) {
   if (req.body.approve) {
     if (query.response_type == "code") {
       // user approved access
-      var code = randomstring.generate(8);
+      let code = randomstring.generate(8);
 
-      var user = req.body.user;
+      let user = req.body.user;
 
-      var scope = __.filter(__.keys(req.body), function (s) {
+      let scope = __.filter(__.keys(req.body), function (s) {
         return __.string.startsWith(s, "scope_");
       }).map(function (s) {
         return s.slice("scope_".length);
       });
-      var client = getClient(query.client_id);
-      var cscope = client.scope ? client.scope.split(" ") : undefined;
+      let client = getClient(query.client_id);
+      let cscope = client.scope ? client.scope.split(" ") : undefined;
       if (__.difference(scope, cscope).length > 0) {
         // client asked for a scope it couldn't have
-        var urlParsed = url.parse(query.redirect_uri);
+        let urlParsed = url.parse(query.redirect_uri);
         delete urlParsed.search; // this is a weird behavior of the URL library
         urlParsed.query = urlParsed.query || {};
         urlParsed.query.error = "invalid_scope";
@@ -127,7 +127,7 @@ app.post("/approve", function (req, res) {
         user: user,
       };
 
-      var urlParsed = url.parse(query.redirect_uri);
+      let urlParsed = url.parse(query.redirect_uri);
       delete urlParsed.search; // this is a weird behavior of the URL library
       urlParsed.query = urlParsed.query || {};
       urlParsed.query.code = code;
@@ -136,7 +136,7 @@ app.post("/approve", function (req, res) {
       return;
     } else {
       // we got a response type we don't understand
-      var urlParsed = url.parse(query.redirect_uri);
+      let urlParsed = url.parse(query.redirect_uri);
       delete urlParsed.search; // this is a weird behavior of the URL library
       urlParsed.query = urlParsed.query || {};
       urlParsed.query.error = "unsupported_response_type";
@@ -145,7 +145,7 @@ app.post("/approve", function (req, res) {
     }
   } else {
     // user denied access
-    var urlParsed = url.parse(query.redirect_uri);
+    let urlParsed = url.parse(query.redirect_uri);
     delete urlParsed.search; // this is a weird behavior of the URL library
     urlParsed.query = urlParsed.query || {};
     urlParsed.query.error = "access_denied";
@@ -155,14 +155,14 @@ app.post("/approve", function (req, res) {
 });
 
 app.post("/token", function (req, res) {
-  var auth = req.headers["authorization"];
+  let auth = req.headers["authorization"];
   if (auth) {
     // check the auth header
-    var clientCredentials = new Buffer(auth.slice("basic ".length), "base64")
+    let clientCredentials = new Buffer(auth.slice("basic ".length), "base64")
       .toString()
       .split(":");
-    var clientId = querystring.unescape(clientCredentials[0]);
-    var clientSecret = querystring.unescape(clientCredentials[1]);
+    let clientId = querystring.unescape(clientCredentials[0]);
+    let clientSecret = querystring.unescape(clientCredentials[1]);
   }
 
   // otherwise, check the post body
@@ -174,11 +174,11 @@ app.post("/token", function (req, res) {
       return;
     }
 
-    var clientId = req.body.client_id;
-    var clientSecret = req.body.client_secret;
+    let clientId = req.body.client_id;
+    let clientSecret = req.body.client_secret;
   }
 
-  var client = getClient(clientId);
+  let client = getClient(clientId);
   if (!client) {
     console.log("Unknown client %s", clientId);
     res.status(401).json({ error: "invalid_client" });
@@ -196,14 +196,14 @@ app.post("/token", function (req, res) {
   }
 
   if (req.body.grant_type == "authorization_code") {
-    var code = codes[req.body.code];
+    let code = codes[req.body.code];
 
     if (code) {
       delete codes[req.body.code]; // burn our code, it's been used
       if (code.authorizationEndpointRequest.client_id == clientId) {
-        var access_token = randomstring.generate();
+        let access_token = randomstring.generate();
 
-        var cscope = null;
+        let cscope = null;
         if (code.scope) {
           cscope = code.scope.join(" ");
         }
@@ -217,7 +217,7 @@ app.post("/token", function (req, res) {
         console.log("Issuing access token %s", access_token);
         console.log("with scope %s", cscope);
 
-        var token_response = {
+        let token_response = {
           access_token: access_token,
           token_type: "Bearer",
           scope: cscope,
@@ -252,9 +252,9 @@ app.use("/", express.static("files/authorizationServer"));
 // clear the database on startup
 nosql.clear();
 
-var server = app.listen(9001, "localhost", function () {
-  var host = server.address().address;
-  var port = server.address().port;
+let server = app.listen(9001, "localhost", function () {
+  let host = server.address().address;
+  let port = server.address().port;
 
   console.log(
     "OAuth Authorization Server is listening at http://%s:%s",
