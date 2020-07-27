@@ -3,8 +3,10 @@ let request = require("sync-request");
 let url = require("url");
 let qs = require("qs");
 let querystring = require("querystring");
+// template engine with underscore
 let cons = require("consolidate");
 let randomstring = require("randomstring");
+// util library(Probably not necessary)
 let __ = require("underscore");
 __.string = require("underscore.string");
 
