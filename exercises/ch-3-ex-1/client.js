@@ -44,10 +44,14 @@ app.get("/", (req, res) => {
   res.render("index", { access_token, scope });
 });
 
-app.get("/authorize", (req, res) => {
-  /*
-   * Send the user to the authorization server
-   */
+// Send the user to the authorization server
+app.get("/authorize", (_req, res) => {
+  const authorizeUrl = buildUrl(authServer.authorizationEndpoint, {
+    response_type: "code",
+    client_id: client.client_id,
+    redirect_uri: client.redirect_uris[0],
+  });
+  res.redirect(authorizeUrl);
 });
 
 app.get("/callback", (req, res) => {
