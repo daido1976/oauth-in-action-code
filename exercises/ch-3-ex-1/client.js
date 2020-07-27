@@ -26,8 +26,8 @@ let authServer = {
  * Add the client information in here
  */
 let client = {
-  client_id: "",
-  client_secret: "",
+  client_id: "oauth-client-1",
+  client_secret: "oauth-client-secret-1",
   redirect_uris: ["http://localhost:9000/callback"],
 };
 
