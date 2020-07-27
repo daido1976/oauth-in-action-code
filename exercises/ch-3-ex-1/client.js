@@ -38,35 +38,35 @@ let state = null;
 let access_token = null;
 let scope = null;
 
-app.get("/", function (req, res) {
-  res.render("index", { access_token: access_token, scope: scope });
+app.get("/", (req, res) => {
+  res.render("index", { access_token, scope });
 });
 
-app.get("/authorize", function (req, res) {
+app.get("/authorize", (req, res) => {
   /*
    * Send the user to the authorization server
    */
 });
 
-app.get("/callback", function (req, res) {
+app.get("/callback", (req, res) => {
   /*
    * Parse the response from the authorization server and get a token
    */
 });
 
-app.get("/fetch_resource", function (req, res) {
+app.get("/fetch_resource", (req, res) => {
   /*
    * Use the access token to call the resource server
    */
 });
 
-let buildUrl = function (base, options, hash) {
+let buildUrl = (base, options, hash) => {
   let newUrl = url.parse(base, true);
   delete newUrl.search;
   if (!newUrl.query) {
     newUrl.query = {};
   }
-  __.each(options, function (value, key, list) {
+  __.each(options, (value, key, list) => {
     newUrl.query[key] = value;
   });
   if (hash) {
@@ -76,7 +76,7 @@ let buildUrl = function (base, options, hash) {
   return url.format(newUrl);
 };
 
-let encodeClientCredentials = function (clientId, clientSecret) {
+let encodeClientCredentials = (clientId, clientSecret) => {
   return new Buffer(
     querystring.escape(clientId) + ":" + querystring.escape(clientSecret)
   ).toString("base64");
@@ -84,7 +84,7 @@ let encodeClientCredentials = function (clientId, clientSecret) {
 
 app.use("/", express.static("files/client"));
 
-let server = app.listen(9000, "localhost", function () {
+let server = app.listen(9000, "localhost", () => {
   let host = server.address().address;
   let port = server.address().port;
   console.log("OAuth Client is listening at http://%s:%s", host, port);
