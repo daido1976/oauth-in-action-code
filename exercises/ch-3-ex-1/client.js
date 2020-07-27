@@ -46,16 +46,23 @@ app.get("/", (req, res) => {
 
 // Send the user to the authorization server
 app.get("/authorize", (_req, res) => {
+  state = randomstring.generate();
   const authorizeUrl = buildUrl(authServer.authorizationEndpoint, {
     response_type: "code",
     client_id: client.client_id,
     redirect_uri: client.redirect_uris[0],
+    state,
   });
   res.redirect(authorizeUrl);
 });
 
 // Parse the response from the authorization server and get a token
 app.get("/callback", (req, res) => {
+  if (req.query.state != state) {
+    res.render("error", { error: "State value did not match!" });
+    return;
+  }
+
   const code = req.query.code;
   const formData = qs.stringify({
     grant_type: "authorization_code",
