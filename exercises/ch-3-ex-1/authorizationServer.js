@@ -155,14 +155,16 @@ app.post("/approve", function (req, res) {
 });
 
 app.post("/token", function (req, res) {
+  let clientId;
+  let clientSecret;
   let auth = req.headers["authorization"];
   if (auth) {
     // check the auth header
     let clientCredentials = new Buffer(auth.slice("basic ".length), "base64")
       .toString()
       .split(":");
-    let clientId = querystring.unescape(clientCredentials[0]);
-    let clientSecret = querystring.unescape(clientCredentials[1]);
+    clientId = querystring.unescape(clientCredentials[0]);
+    clientSecret = querystring.unescape(clientCredentials[1]);
   }
 
   // otherwise, check the post body
@@ -174,8 +176,8 @@ app.post("/token", function (req, res) {
       return;
     }
 
-    let clientId = req.body.client_id;
-    let clientSecret = req.body.client_secret;
+    clientId = req.body.client_id;
+    clientSecret = req.body.client_secret;
   }
 
   let client = getClient(clientId);
