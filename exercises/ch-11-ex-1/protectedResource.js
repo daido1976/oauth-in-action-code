@@ -11,6 +11,7 @@ var __ = require("underscore");
 var base64url = require("base64url");
 var jose = require("jsrsasign");
 var cors = require("cors");
+const { react } = require("consolidate");
 
 var app = express();
 
@@ -49,10 +50,10 @@ var authServer = {
   introspectionEndpoint: "http://localhost:9001/introspect",
 };
 
-var getAccessToken = function (req, res, next) {
+const getAccessToken = function (req, res, next) {
   // check the auth header first
-  var auth = req.headers["authorization"];
-  var inToken = null;
+  const auth = req.headers["authorization"];
+  let inToken = "";
   if (auth && auth.toLowerCase().indexOf("bearer") == 0) {
     inToken = auth.slice("bearer ".length);
   } else if (req.body && req.body.access_token) {
@@ -64,9 +65,21 @@ var getAccessToken = function (req, res, next) {
 
   console.log("Incoming token: %s", inToken);
 
-  /*
-   * Parse and validate the JWT here
-   */
+  // Parse and validate the JWT here
+  let tokenParts = inToken.split(".");
+  const payload = JSON.parse(base64url.decode(tokenParts[1]));
+
+  if (payload.iss === "http://localhost:9001/") {
+    if (payload.aud === "http://localhost:9002/") {
+      let now = Math.floor(Date.now() / 1000);
+      if (payload.iat <= now) {
+        if (payload.exp >= now) {
+          // it is valid JWT
+          req.access_token = payload;
+        }
+      }
+    }
+  }
 
   next();
   return;
