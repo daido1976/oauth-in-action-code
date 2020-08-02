@@ -222,10 +222,27 @@ app.post("/token", function (req, res) {
          * Generate a JWT-formatted token instead of this random token
          */
 
-        var access_token = randomstring.generate();
+        // var access_token = randomstring.generate();
+        let header = {
+          typ: "JWT",
+          alg: "none",
+        };
 
-        nosql.insert({
-          access_token: access_token,
+        let payload = {
+          iss: "http://localhost:9001/",
+          sub: code.user ? code.user.sub : undefined,
+          aud: "http://localhost:9002/",
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 5 * 60,
+          jti: randomstring.generate(8),
+        };
+
+        let jwtToken = `${base64url.encode(
+          JSON.stringify(header)
+        )}.${base64url.encode(JSON.stringify(payload))}.`;
+
+        let access_token = base64url.nosql.insert({
+          access_token: jwtToken,
           client_id: clientId,
           scope: code.scope,
           user: code.user,
@@ -234,7 +251,7 @@ app.post("/token", function (req, res) {
         console.log("Issuing access token %s", access_token);
 
         var token_response = {
-          access_token: access_token,
+          access_token,
           token_type: "Bearer",
           scope: code.scope.join(" "),
         };
