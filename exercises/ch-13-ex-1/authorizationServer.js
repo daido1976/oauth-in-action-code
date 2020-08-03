@@ -273,10 +273,10 @@ app.post("/token", function (req, res) {
           }
 
           let privateKey = jose.KEYUTIL.getKey(rsaKey);
-          let id_token = jose.jws.JWS.sing(
+          let id_token = jose.jws.JWS.sign(
             header.alg,
             JSON.stringify(header),
-            JSON.stringify(payload),
+            JSON.stringify(ipayload),
             privateKey
           );
 
