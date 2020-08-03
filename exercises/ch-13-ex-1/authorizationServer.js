@@ -254,6 +254,34 @@ app.post("/token", function (req, res) {
         /*
          * Generate an ID token, if necessary
          */
+        if (__.contains(code.scope, "openid") && code.user) {
+          let header = {
+            typ: "JWT",
+            alg: rsaKey.alg,
+            kid: rsaKey.kid,
+          };
+          let ipayload = {
+            iss: "http://localhost:9001/",
+            sub: code.user.sub,
+            aud: client.client_id,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 5 * 60,
+          };
+
+          if (code.request.nonce) {
+            ipayload.nonce = code.request.nonce;
+          }
+
+          let privateKey = jose.KEYUTIL.getKey(rsaKey);
+          let id_token = jose.jws.JWS.sing(
+            header.alg,
+            JSON.stringify(header),
+            JSON.stringify(payload),
+            privateKey
+          );
+
+          token_response.id_token = id_token;
+        }
 
         res.status(200).json(token_response);
         console.log("Issued tokens for code %s", req.body.code);
