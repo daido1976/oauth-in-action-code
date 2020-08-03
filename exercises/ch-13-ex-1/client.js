@@ -134,6 +134,29 @@ app.get("/callback", function (req, res) {
     /*
      * Parse and validate the ID token
      */
+    if (body.id_token) {
+      userInfo = null;
+      id_token = null;
+
+      let pubKey = jose.KEYUTIL.getKey(rsaKey);
+      let tokenParts = body.id_token.split(".");
+      let payload = JSON.parse(base64url.decode(tokenParts[1]));
+      if (jose.jws.JWS.verify(body.id_token, pubKey, [rsaKey.alg])) {
+        if (payload.iss == "http://localhost:9001/") {
+          if (payload.aud == client.client_id) {
+            let now = Math.floor(Date.now() / 1000);
+            if (payload.iat <= now) {
+              if (payload.exp >= now) {
+                id_token = payload;
+              }
+            }
+          }
+        }
+      }
+
+      res.render("userinfo", { userInfo, id_token });
+      return;
+    }
 
     res.render("index", {
       access_token: access_token,
