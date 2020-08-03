@@ -205,6 +205,23 @@ app.get("/userinfo", function (req, res) {
   /*
    * Call the UserInfo endpoint and store/display the results
    */
+  let headers = {
+    Authorization: `Bearer ${access_token}`,
+  };
+  let resource = request("GET", authServer.userInfoEndpoint, {
+    headers,
+  });
+  if (resource.statusCode >= 200 && resource.statusCode < 300) {
+    let body = JSON.parse(resource.getBody());
+    userInfo = body;
+    res.render("userinfo", {
+      userInfo,
+      id_token,
+    });
+  } else {
+    res.render("error", { error: "Unable to fetch user info...!" });
+    return;
+  }
 });
 
 app.use("/", express.static("files/client"));
